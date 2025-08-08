@@ -85,7 +85,7 @@ func ResourceIntegrationPolicy() *schema.Resource {
 						ValidateFunc: validation.StringIsJSON,
 						Optional:     true,
 						Computed:     true,
-						Sensitive:    true,
+						Sensitive:    false,
 					},
 					"vars_json": {
 						Description:  "Input variables as JSON.",
@@ -93,7 +93,7 @@ func ResourceIntegrationPolicy() *schema.Resource {
 						ValidateFunc: validation.StringIsJSON,
 						Computed:     true,
 						Optional:     true,
-						Sensitive:    true,
+						Sensitive:    false,
 					},
 				},
 			},
