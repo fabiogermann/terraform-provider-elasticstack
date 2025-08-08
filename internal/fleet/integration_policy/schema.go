@@ -128,7 +128,7 @@ func getSchemaV2() schema.Schema {
 				},
 				Computed:  true,
 				Optional:  true,
-				Sensitive: varsAreSensitive,
+				Sensitive: false,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -170,7 +170,7 @@ func getInputsNestedObject(varsAreSensitive bool) schema.NestedAttributeObject {
 				Description: "Input-level variables as JSON.",
 				CustomType:  jsontypes.NormalizedType{},
 				Optional:    true,
-				Sensitive:   varsAreSensitive,
+				Sensitive:   false,
 			},
 			"defaults": schema.SingleNestedAttribute{
 				Description: "Input defaults.",
@@ -225,7 +225,7 @@ func getInputStreamNestedObject(varsAreSensitive bool) schema.NestedAttributeObj
 				Description: "Stream-level variables as JSON.",
 				CustomType:  jsontypes.NormalizedType{},
 				Optional:    true,
-				Sensitive:   varsAreSensitive,
+				Sensitive:   false,
 			},
 		},
 	}

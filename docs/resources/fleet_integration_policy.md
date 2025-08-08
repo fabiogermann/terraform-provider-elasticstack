@@ -147,6 +147,8 @@ Read-Only:
 
 - `enabled` (Boolean) Default enabled state for the stream.
 - `vars` (String) Stream-level variable defaults as JSON.
+- `streams_json` (String) Input streams as JSON.
+- `vars_json` (String) Input variables as JSON.
 
 ## Import
 
