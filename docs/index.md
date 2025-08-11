@@ -5,6 +5,10 @@ description: |-
   The Elasticstack provider provides the resources to interact with Elastic stack products.
 ---
 
+# Forked Elasticstack Provider
+Changes:
+- remove "sensitive" from integration policy's `vars_json` and `stream_json`
+
 # Elasticstack Provider
 
 The Elasticstack provider provides the resources to interact with Elastic stack products.

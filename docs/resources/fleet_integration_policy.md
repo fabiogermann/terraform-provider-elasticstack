@@ -111,8 +111,8 @@ Required:
 Optional:
 
 - `enabled` (Boolean) Enable the input.
-- `streams_json` (String, Sensitive) Input streams as JSON.
-- `vars_json` (String, Sensitive) Input variables as JSON.
+- `streams_json` (String) Input streams as JSON.
+- `vars_json` (String) Input variables as JSON.
 
 ## Import
 
