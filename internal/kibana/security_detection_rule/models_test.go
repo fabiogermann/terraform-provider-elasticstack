@@ -818,17 +818,20 @@ func TestActionsToAPI(t *testing.T) {
 	ctx := context.Background()
 	var diags diag.Diagnostics
 
+	// Create params as a Map with string values
+	paramsMap := typeutils.MapValueFrom(ctx, map[string]string{
+		"message": "Alert triggered",
+		"channel": "#security",
+	}, types.StringType, path.Root("actions").AtListIndex(0).AtName("params"), &diags)
+
 	data := Data{
 		Actions: typeutils.ListValueFrom(ctx, []ActionModel{
 			{
-				ActionTypeID: types.StringValue(".slack"),
-				ID:           types.StringValue("slack-action-1"),
-				Params: typeutils.MapValueFrom(ctx, map[string]attr.Value{
-					"message": types.StringValue("Alert triggered"),
-					"channel": types.StringValue("#security"),
-				}, types.StringType, path.Root("actions").AtListIndex(0).AtName("params"), &diags),
-				Group: types.StringValue("default"),
-				UUID:  types.StringNull(),
+				ActionTypeId: types.StringValue(".slack"),
+				Id:           types.StringValue("slack-action-1"),
+				Params:       paramsMap,
+				Group:        types.StringValue("default"),
+				UUID:         types.StringNull(),
 				AlertsFilter: typeutils.MapValueFrom(ctx, map[string]attr.Value{
 					"status":   types.StringValue("open"),
 					"severity": types.StringValue("high"),
@@ -905,8 +908,8 @@ func TestConvertActionsToModel(t *testing.T) {
 	require.Len(t, actions, 1)
 
 	action := actions[0]
-	require.Equal(t, ".email", action.ActionTypeID.ValueString())
-	require.Equal(t, "email-action-1", action.ID.ValueString())
+	require.Equal(t, ".email", action.ActionTypeId.ValueString())
+	require.Equal(t, "email-action-1", action.Id.ValueString())
 	require.Equal(t, "default", action.Group.ValueString())
 	require.Equal(t, "action-uuid-123", action.UUID.ValueString())
 }

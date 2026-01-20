@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/elastic/terraform-provider-elasticstack/generated/kbapi"
 	"github.com/elastic/terraform-provider-elasticstack/internal/clients"
@@ -559,6 +560,32 @@ func (d Data) responseActionsToAPI(ctx context.Context, client clients.MinVersio
 	return apiResponseActions, diags
 }
 
+// tryParseJSON attempts to parse a string as JSON.
+// If successful and the result is an object or array, returns the parsed value.
+// Otherwise returns the original string.
+func tryParseJSON(s string) interface{} {
+	// Quick checks to avoid unnecessary parsing attempts
+	trimmed := strings.TrimSpace(s)
+	if len(trimmed) == 0 {
+		return s
+	}
+
+	// Only attempt to parse if it looks like JSON object or array
+	firstChar := trimmed[0]
+	if firstChar != '{' && firstChar != '[' {
+		return s // Return as plain string
+	}
+
+	var result interface{}
+	if err := json.Unmarshal([]byte(s), &result); err != nil {
+		// Not valid JSON, return as plain string
+		return s
+	}
+
+	// Return parsed JSON (object or array)
+	return result
+}
+
 // Helper function to process actions configuration for all rule types
 func (d Data) actionsToAPI(ctx context.Context) ([]kbapi.SecurityDetectionsAPIRuleAction, diag.Diagnostics) {
 	var diags diag.Diagnostics
@@ -570,22 +597,24 @@ func (d Data) actionsToAPI(ctx context.Context) ([]kbapi.SecurityDetectionsAPIRu
 	apiActions := typeutils.ListTypeToSlice(ctx, d.Actions, path.Root("actions"), &diags,
 		func(action ActionModel, meta typeutils.ListMeta) kbapi.SecurityDetectionsAPIRuleAction {
 			apiAction := kbapi.SecurityDetectionsAPIRuleAction{
-				ActionTypeId: action.ActionTypeID.ValueString(),
-				Id:           action.ID.ValueString(),
+				ActionTypeId: action.ActionTypeId.ValueString(),
+				Id:           action.Id.ValueString(),
 			}
 
-			// Convert params map
+			// Convert params - try to parse JSON strings
 			if typeutils.IsKnown(action.Params) {
-				paramsStringMap := make(map[string]string)
-				paramsDiags := action.Params.ElementsAs(ctx, &paramsStringMap, false)
-				if !paramsDiags.HasError() {
-					paramsMap := make(map[string]any)
-					for k, v := range paramsStringMap {
-						paramsMap[k] = v
+				// Extract string map from types.Map
+				stringMap := make(map[string]string)
+				mapDiags := action.Params.ElementsAs(ctx, &stringMap, false)
+				if !mapDiags.HasError() {
+					paramsMap := make(map[string]interface{})
+					for key, value := range stringMap {
+						// Try to parse as JSON first, otherwise use as string
+						paramsMap[key] = tryParseJSON(value)
 					}
 					apiAction.Params = kbapi.SecurityDetectionsAPIRuleActionParams(paramsMap)
 				}
-				meta.Diags.Append(paramsDiags...)
+				meta.Diags.Append(mapDiags...)
 			}
 
 			// Set optional fields

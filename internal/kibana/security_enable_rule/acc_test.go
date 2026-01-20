@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/elastic/terraform-provider-elasticstack/generated/kbapi"
@@ -39,7 +40,13 @@ var minVersionEnableRule = version.Must(version.NewVersion("8.11.0"))
 
 const defaultSpaceID = "default"
 
-func TestAccResourceEnableRule(t *testing.T) {
+func preCheckAcceptanceAndVersion(t *testing.T) {
+	t.Helper()
+
+	if os.Getenv("TF_ACC") != "1" {
+		t.Skip("Acceptance tests skipped unless TF_ACC=1")
+	}
+
 	// Skip entire test if version is below 8.11.0
 	skipFunc := versionutils.CheckIfVersionIsUnsupported(minVersionEnableRule)
 	if skip, err := skipFunc(); err != nil {
@@ -47,6 +54,10 @@ func TestAccResourceEnableRule(t *testing.T) {
 	} else if skip {
 		t.Skip("Test requires version 8.11.0 or higher")
 	}
+}
+
+func TestAccResourceEnableRule(t *testing.T) {
+	preCheckAcceptanceAndVersion(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -67,13 +78,7 @@ func TestAccResourceEnableRule(t *testing.T) {
 }
 
 func TestAccResourceEnableRuleWithManualDisable(t *testing.T) {
-	// Skip entire test if version is below 8.11.0
-	skipFunc := versionutils.CheckIfVersionIsUnsupported(minVersionEnableRule)
-	if skip, err := skipFunc(); err != nil {
-		t.Fatalf("failed to check version: %v", err)
-	} else if skip {
-		t.Skip("Test requires version 8.11.0 or higher")
-	}
+	preCheckAcceptanceAndVersion(t)
 
 	tagKey := "test_tag"
 	tagValue := sdkacctest.RandStringFromCharSet(10, sdkacctest.CharSetAlphaNum)
@@ -109,13 +114,7 @@ func TestAccResourceEnableRuleWithManualDisable(t *testing.T) {
 }
 
 func TestAccResourceEnableRuleDisableOnDestroyFalse(t *testing.T) {
-	// Skip entire test if version is below 8.11.0
-	skipFunc := versionutils.CheckIfVersionIsUnsupported(minVersionEnableRule)
-	if skip, err := skipFunc(); err != nil {
-		t.Fatalf("failed to check version: %v", err)
-	} else if skip {
-		t.Skip("Test requires version 8.11.0 or higher")
-	}
+	preCheckAcceptanceAndVersion(t)
 
 	tagKey := "test_tag"
 	tagValue := sdkacctest.RandStringFromCharSet(10, sdkacctest.CharSetAlphaNum)
